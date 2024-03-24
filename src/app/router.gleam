@@ -13,7 +13,7 @@ pub fn router(req: Request) -> Response {
       case wisp.path_segments(req) {
         ["sign-up"] -> sign_up(req, db)
         ["sign-in"] -> sign_in(req, db)
-        ["add-authentication-method"] -> add_authentication_method(req, db)
+        ["method"] -> add_authentication_method(req, db)
         _ -> wisp.not_found()
       }
     Error(_) -> wisp.internal_server_error()
