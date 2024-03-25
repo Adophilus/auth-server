@@ -5,6 +5,7 @@ import gleam/option.{None}
 import gleam/result.{try}
 import gleam/httpc
 import gleam/io
+import gleam/dynamic
 import gleam/crypto
 import gleam/bit_array
 import app/config.{get_config}
@@ -71,8 +72,37 @@ pub fn generate_token(user: User) -> String {
       json.object([#("email", json.string(user.email))])
         |> json.to_string
         |> bit_array.from_string,
+      _,
       crypto.Sha512,
     )
 
   token
+}
+
+pub type JwtToken {
+  JwtToken(email: String)
+}
+
+pub fn decode_token(token: String) -> Result(JwtToken, Nil) {
+  let assert Ok(config) = get_config()
+
+  use payload <- result.try(
+    token
+    |> crypto.verify_signed_message(
+      config.secret_key
+      |> bit_array.from_string,
+    )
+    |> result.map(fn(ba) {
+      ba
+      |> bit_array.to_string
+    })
+    |> result.flatten
+    |> result.map_error(fn(_) { Nil }),
+  )
+
+  json.decode(
+    payload,
+    dynamic.decode1(JwtToken, dynamic.field("email", dynamic.string)),
+  )
+  |> result.map_error(fn(_) { Nil })
 }

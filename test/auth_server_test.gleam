@@ -113,7 +113,7 @@ pub fn should_add_an_authentication_method_test() {
         #("content-type", "application/json"),
         #("authorization", "Bearer " <> token),
       ],
-      body: json.object([#("type", json.string("passkey"))])
+      body: json.object([#("method", json.string("passkey"))])
         |> json.to_string,
       scheme: Http,
       host: "127.0.0.1",
