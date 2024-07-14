@@ -1,4 +1,8 @@
-*.beam
-*.ez
-/build
-erl_crash.dump
+# Created by https://www.toptal.com/developers/gitignore/api/direnv
+# Edit at https://www.toptal.com/developers/gitignore?templates=direnv
+
+### direnv ###
+.direnv
+.env
+
+# End of https://www.toptal.com/developers/gitignore/api/direnv

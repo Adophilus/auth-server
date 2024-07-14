@@ -1,18 +1,18 @@
-import gleam/erlang/process
-import wisp
+import app/config
+import app/context
 import app/router.{router}
+import gleam/erlang/process
 import mist
-import app/config.{get_config}
-import dotenv_gleam
+import wisp
 
 pub fn main() {
-  dotenv_gleam.config()
   wisp.configure_logger()
 
-  let assert Ok(config) = get_config()
+  let assert Ok(config) = config.load()
+  let assert Ok(ctx) = context.new(config)
 
   let assert Ok(_) =
-    wisp.mist_handler(router, config.secret_key)
+    wisp.mist_handler(fn(req) { router(req, ctx) }, config.secret_key)
     |> mist.new()
     |> mist.port(config.port)
     |> mist.start_http

@@ -13,6 +13,9 @@
     devShells.${system} = {
       default = pkgs.mkShell {
         buildInputs = with pkgs; [
+          air
+          sqlx-cli
+          mitmproxy
           gleam
           erlang
           rebar3

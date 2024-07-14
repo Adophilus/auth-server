@@ -1,15 +1,17 @@
-import wisp
-import gleam/http.{Post}
-import gleam/result.{try}
+import app/api_response.{type ApiResponse}
+import app/database
+import app/types
+import app/utils
+import app/utils/token
 import gleam/dynamic.{type Dynamic}
+import gleam/http.{Post}
+import gleam/http/request
 import gleam/io
-import gleam/string
 import gleam/json
 import gleam/list
-import app/database.{type Database}
-import app/api_response.{type ApiResponse}
-import app/utils
-import gleam/http/request
+import gleam/result.{try}
+import gleam/string
+import wisp
 
 type Body {
   Body(method: String)
@@ -21,20 +23,20 @@ fn decode_body(json: Dynamic) -> Result(Body, dynamic.DecodeErrors) {
   decoder(json)
 }
 
-pub fn add_method(req: wisp.Request, db: Database) -> wisp.Response {
+pub fn add_method(req: wisp.Request, ctx: types.Context) -> wisp.Response {
   use <- wisp.require_method(req, Post)
   use json_body <- wisp.require_json(req)
 
   check_authentication(req)
   |> result.map(fn(token) {
     token
-    |> utils.decode_token
+    |> token.to_access_token(ctx.token, _)
     |> result.map_error(fn(_) { api_response.err("Invalid token!", 400) })
     |> result.map(fn(token) {
       let req_body = decode_body(json_body)
 
       case req_body {
-        Ok(_) -> api_response.ok("Welcome " <> token.email, 200)
+        Ok(_) -> api_response.ok("Welcome " <> token.id, 200)
         Error(_) -> api_response.err("Invalid body!", 400)
       }
     })

@@ -1,0 +1,7 @@
+CREATE TABLE sessions (
+  id VARCHAR PRIMARY KEY NOT NULL,
+  user_id VARCHAR NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP
+);

@@ -1,5 +1,6 @@
 [build]
-  bin = "./run.sh"
+  # bin = "./run.sh"
+  bin = "./workflow.sh"
   cmd = ":"
   include_ext = ["gleam"]
   exclude_dir = ["build", "tmp"]

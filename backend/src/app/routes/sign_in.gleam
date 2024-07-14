@@ -1,13 +1,16 @@
-import wisp
-import gleam/http.{Post}
-import gleam/result
-import gleam/option
-import gleam/dynamic.{type Dynamic}
-import gleam/json
-import gleam/io
-import app/database.{type Database}
 import app/api_response
+import app/database
+import app/database/user
+import app/types
 import app/utils
+import app/utils/token
+import gleam/dynamic.{type Dynamic}
+import gleam/http.{Post}
+import gleam/io
+import gleam/json
+import gleam/option.{None, Some}
+import gleam/result
+import wisp
 
 type Body {
   Body(email: String, password: String)
@@ -24,7 +27,7 @@ fn decode_body(json: Dynamic) -> Result(Body, dynamic.DecodeErrors) {
   decoder(json)
 }
 
-pub fn sign_in(req: wisp.Request, db: Database) -> wisp.Response {
+pub fn sign_in(req: wisp.Request, ctx: types.Context) -> wisp.Response {
   use <- wisp.require_method(req, Post)
   use json_body <- wisp.require_json(req)
 
@@ -35,21 +38,23 @@ pub fn sign_in(req: wisp.Request, db: Database) -> wisp.Response {
         api_response.err("Invalid request body", 400)
       }),
     )
-    use user <- result.try(
-      database.get_user(db, body.email)
-      |> result.map(fn(opt) {
-        option.to_result(opt, api_response.err("Invalid credentials", 400))
-      })
-      |> result.flatten,
-    )
 
-    case utils.compare_hash(body.password, user.password) {
-      True -> {
-        let token = utils.generate_token(user)
-        Ok(api_response.ok(token, 200))
+    // TODO: fix this
+    case user.fetch_by_id(ctx.db, "") {
+      Ok(None) -> api_response.err("Invalid credentials", 400)
+      Ok(Some(user)) -> {
+        // TODO: fix this as well
+        case utils.compare_hash(body.password, user.id) {
+          True -> {
+            let token = token.generate_access_token(ctx.token, user)
+            api_response.ok(token.token, 200)
+          }
+          False -> api_response.err("Invalid credentials", 400)
+        }
       }
-      False -> Error(api_response.err("Invalid credentials", 400))
+      Error(_) -> api_response.err("Failed to find user", 500)
     }
+    |> Ok
   }
 
   res
