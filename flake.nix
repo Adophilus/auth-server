@@ -14,6 +14,7 @@
       default = pkgs.mkShell {
         buildInputs = with pkgs; [
           air
+          just
           sqlx-cli
           mitmproxy
           gleam

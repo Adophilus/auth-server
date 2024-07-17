@@ -1,1 +1,1 @@
-DROP TABLE auththentication_methods;
+DROP TABLE authentication_methods;

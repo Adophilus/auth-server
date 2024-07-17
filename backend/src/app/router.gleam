@@ -9,7 +9,7 @@ pub fn router(req: Request, ctx: types.Context) -> Response {
   use req <- middleware(req)
 
   case wisp.path_segments(req) {
-    ["sign-up"] -> sign_up(req, ctx)
+    ["sign-up", ..rest] -> sign_up.route(rest, req, ctx)
     ["sign-in"] -> sign_in(req, ctx)
     ["method"] -> add_method(req, ctx)
     _ -> wisp.not_found()

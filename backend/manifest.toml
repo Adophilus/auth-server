@@ -32,11 +32,11 @@ gleam_erlang = { version = "~> 0.24" }
 gleam_http = { version = "~> 3.6" }
 gleam_httpc = { version = "~> 2.1" }
 gleam_json = { version = "~> 1.0" }
-gleam_stdlib = { version = "~> 0.34 or ~> 1.0" }
+gleam_stdlib = { version = "~> 0.34" }
 gleeunit = { version = "~> 1.0" }
 gwt = { version = "~> 0.1" }
 ids = { version = ">= 0.12.0 and < 1.0.0" }
 mist = { version = "~> 0.17" }
-rada = { version = ">= 0.4.0 and < 1.0.0"}
+rada = { version = ">= 0.4.0 and < 1.0.0" }
 sqlight = { version = "~> 0.9" }
 wisp = { version = "~> 0.12" }

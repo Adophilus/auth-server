@@ -9,7 +9,7 @@ links = [
 # licences = ["Apache-2.0"]
 
 [dependencies]
-gleam_stdlib = "~> 0.34 or ~> 1.0"
+gleam_stdlib = "~> 0.34"
 wisp = "~> 0.12"
 mist = "~> 0.17"
 gleam_http = "~> 3.6"

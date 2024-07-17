@@ -15,10 +15,19 @@ pub type User {
 pub type Error {
   UserAlreadyExists
   UnexpectedError
+  UserNotFound
 }
 
-pub fn create(db: types.DatabaseConnection) -> Result(Nil, Error) {
-  let query = "INSERT INTO users (email) VALUES ($1)"
+pub type CreateUserPayload {
+  CreateUserPayload(is_verified: Bool)
+}
+
+pub fn create(
+  db: types.DatabaseConnection,
+  payload: CreateUserPayload,
+) -> Result(User, Error) {
+  let query =
+    "INSERT INTO users (id, is_verified, created_at) VALUES ($1, $2, $3) RETURNING id, ''"
 
   case
     sqlight.query(
@@ -26,15 +35,19 @@ pub fn create(db: types.DatabaseConnection) -> Result(Nil, Error) {
       on: db.connection,
       with: [
         sqlight.text(ulid.generate()),
+        sqlight.bool(payload.is_verified),
         sqlight.int(
           date.today()
           |> date.to_rata_die,
         ),
       ],
-      expecting: dynamic.dynamic,
+      expecting: dynamic.tuple2(dynamic.string, dynamic.string),
     )
   {
-    Ok(_) -> Ok(Nil)
+    Ok([]) -> Error(UserNotFound)
+    Ok([row, ..]) -> {
+      Ok(User(id: row.0))
+    }
     Error(sqlight.SqlightError(sqlight.ConstraintCheck, _, _)) ->
       Error(UserAlreadyExists)
     Error(sqlight.SqlightError(err, _, _)) -> {
@@ -49,7 +62,7 @@ pub fn fetch_by_id(
   db: types.DatabaseConnection,
   email: String,
 ) -> Result(Option(User), Error) {
-  let query = "SELECT * FROM users WHERE id = $1"
+  let query = "SELECT id, '' FROM users WHERE id = $1"
 
   case
     sqlight.query(
@@ -59,11 +72,8 @@ pub fn fetch_by_id(
       expecting: dynamic.tuple2(dynamic.string, dynamic.string),
     )
   {
-    Ok(row) ->
-      list.at(row, 0)
-      |> result.map(fn(row) { Some(User(row.0)) })
-      |> result.unwrap(None)
-      |> Ok
+    Ok([]) -> Ok(None)
+    Ok([row, ..]) -> Ok(Some(User(id: row.0)))
     Error(err) -> {
       io.debug("Error occurred while running query: " <> query)
       io.debug(err)

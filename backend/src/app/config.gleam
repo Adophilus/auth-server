@@ -4,8 +4,8 @@ import gleam/int
 import gleam/result.{try}
 
 pub fn load() -> Result(types.Config, Nil) {
-  use database_url <- try(os.get_env("DATABASE_URL"))
-  let database_url = database_url <> "?mode=memory"
+  use database_file <- try(os.get_env("DATABASE_FILE"))
+  let database_url = "file:" <> database_file
   use resend_api_key <- try(os.get_env("RESEND_API_KEY"))
   use raw_port <- try(os.get_env("PORT"))
   use port <- try(int.parse(raw_port))
